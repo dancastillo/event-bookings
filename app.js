@@ -12,6 +12,36 @@ const app = express();
 
 app.use(bodyParser.json());
 
+const events = eventIds => {
+  return Event.find({ _id: { $in: eventIds }})
+    .then(events => {
+      return events.map(event => {
+        return {
+          ...event._doc,
+          _id: event.id,
+          creator: user.bind(this, event.creator)
+        }
+      })
+    })
+    .catch(err => {
+      throw err;
+    });
+};
+
+const user = userId => {
+  return User.findById(userId)
+    .then(user => {
+      return {
+        ...user._doc,
+        _id: user.id,
+        createdEvents: events.bind(this, user.createdEvents)
+      }
+    })
+    .catch(err => {
+      throw err;
+    })
+};
+
 app.use('/graphql', graphqlHttp({
     schema: buildSchema(`
       type Event {
@@ -20,12 +50,14 @@ app.use('/graphql', graphqlHttp({
         description: String!
         price: Float!
         date: String!
+        creator: User!
       }
       
       type User {
         _id: ID!
         email: String!
         password: String
+        createdEvents: [Event!]
       }
       
       input UserInput {
@@ -61,7 +93,8 @@ app.use('/graphql', graphqlHttp({
             return events.map(event => {
               return {
                 ...event._doc,
-                _id: event._doc._id.toString()
+                _id: event.id,
+                creator: user.bind(this, event._doc.creator)
               };
             })
           })
@@ -82,9 +115,14 @@ app.use('/graphql', graphqlHttp({
 
         let createdEvent;
 
-        return event.save()
+        return event
+          .save()
           .then(result => {
-            createdEvent = result;
+            createdEvent = {
+              ...result._doc,
+              _id: result._doc._id.toString(),
+              creator: user.bind(this, result._doc.creator)
+            };
             return User.findById('5d9d3a68584f1b0e61fcc06f');
           })
           .then(user => {
@@ -110,12 +148,10 @@ app.use('/graphql', graphqlHttp({
             return bcrypt.hash(args.userInput.password, 12)
           })
         .then(hashedPassword => {
-          console.log(hashedPassword)
           const user = new User({
             email: args.userInput.email,
             password: hashedPassword
           });
-          console.log(user);
 
           return user.save();
         })
