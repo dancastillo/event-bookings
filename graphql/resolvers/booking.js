@@ -1,4 +1,3 @@
-// const Event = require('./../../models/Event');
 const Booking = require('./../../models/booking');
 const { transformEvent, transformBooking } = require('./events');
 
