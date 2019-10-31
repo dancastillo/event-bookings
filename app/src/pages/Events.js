@@ -15,6 +15,7 @@ class EventsPage extends Component {
     isLoading: false,
     selectedEvent: null
   };
+  isActive = true;
 
   static contextType = AuthContext;
 
@@ -29,7 +30,6 @@ class EventsPage extends Component {
   componentDidMount() {
     this.fetchEvent();
   }
-
 
   startCreateEventHandler = () => {
     this.setState({creating: true})
@@ -141,7 +141,6 @@ class EventsPage extends Component {
       }
     })
       .then(res => {
-        console.log(res)
         if (res.status !== 200 && res.status !== 201) {
           throw new Error(`Failed: ${res.status}`);
         }
@@ -149,12 +148,16 @@ class EventsPage extends Component {
         return res.json();
       })
       .then(data => {
-        const { events } = data.data
-        this.setState({ events, isLoading: false})
+        const { events } = data.data;
+        if (this.isActive) {
+          this.setState({ events, isLoading: false})
+        }
       })
       .catch(err => {
-        console.log(err)
-        this.setState({ isLoading: false});
+        console.log(err);
+        if (this.isActive) {
+          this.setState({ isLoading: false});
+        }
       });
   };
 
@@ -210,10 +213,14 @@ class EventsPage extends Component {
       });
   };
 
+  componentWillUnmount() {
+    this.isActive = false;
+  }
+
   render() {
     return (
       <React.Fragment>
-        {this.state.creating || this.state.selectedEvent && <Backdrop />}
+        {(this.state.creating || this.state.selectedEvent) && <Backdrop />}
         {this.state.creating &&
           (<Modal title='Add Event'
                  canCancel
