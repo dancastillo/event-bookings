@@ -50,7 +50,6 @@ class EventsPage extends Component {
     ) {
       return;
     }
-    const event = { title, price, date, description };
 
     const requestBody = {
       query: `
