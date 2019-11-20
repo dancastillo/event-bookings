@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { login, createUser } from './../helpers/requestBody';
 
 import './Auth.css';
 import AuthContext from '../context/auth-context';
@@ -34,39 +35,7 @@ class AuthPage extends Component {
       return;
     }
 
-    let requestBody = {
-      query: `
-        query Login($email: String!, $password: String!) {
-          login(email: $email, password: $password) {
-            userId
-            token
-            tokenExpiration
-          }
-        }
-      `,
-      variables: {
-        email,
-        password
-      }
-    };
-
-    if (!this.state.isLogin) {
-
-      requestBody = {
-        query: `
-            mutation CreateUser($email: String!, $password: String!) {
-              createUser(userInput: {email: $email, password: $password}) {
-                _id
-                email
-              }
-            }
-          `,
-        variables: {
-          email,
-          password
-        }
-      };
-    }
+    const requestBody = (!this.state.isLogin) ? createUser(email, password) : login(email, password);
 
     fetch('http://localhost:8000/graphql', {
       method: 'POST',
@@ -94,7 +63,7 @@ class AuthPage extends Component {
   render() {
     return <form className="auth-form" onSubmit={this.submitHandler}>
       <div className="form-control">
-        <label htmlFor="email">Eamil</label>
+        <label htmlFor="email">Email</label>
         <input type="email" id="email" ref={this.emailEl}/>
       </div>
       <div className="form-control">

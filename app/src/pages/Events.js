@@ -86,7 +86,6 @@ class EventsPage extends Component {
       }
     })
       .then(res => {
-        console.log(res)
         if (res.status !== 200 && res.status !== 201) {
           throw new Error(`Failed: ${res.status}`);
         }
@@ -158,7 +157,6 @@ class EventsPage extends Component {
         }
       })
       .catch(err => {
-        console.log(err);
         if (this.isActive) {
           this.setState({ isLoading: false});
         }
@@ -211,11 +209,9 @@ class EventsPage extends Component {
         return res.json();
       })
       .then(data => {
-        console.log(data);
         this.setState({ selectedEvent: null });
       })
       .catch(err => {
-        console.log(err)
         this.setState({ selectedEvent: null });
       });
   };

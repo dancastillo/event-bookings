@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import { queryBookings, cancelBooking } from './../helpers/requestBody';
 import Spinner from '../components/Spinner/Spinner';
 import AuthContext from '../context/auth-context';
 import BookingList from '../components/Bookings/BookingList/BookingList';
@@ -22,33 +23,16 @@ class BookingsPage extends Component {
 
   fetchBookings = () => {
     this.setState({ isLoading: true });
-    const requestBody = {
-      query: `
-          query {
-            bookings {
-              _id
-              createdAt
-              event {
-                _id
-                title
-                date
-                price
-              }
-            }
-          }
-        `
-    };
 
     fetch('http://localhost:8000/graphql', {
       method: 'POST',
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(queryBookings),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer: ${this.context.token}`
       }
     })
       .then(res => {
-        console.log(res)
         if (res.status !== 200 && res.status !== 201) {
           throw new Error(`Failed: ${res.status}`);
         }
@@ -61,7 +45,6 @@ class BookingsPage extends Component {
         this.setState({ bookings, isLoading: false})
       })
       .catch(err => {
-        console.log(err)
         this.setState({ isLoading: false});
       });
   };
@@ -75,30 +58,16 @@ class BookingsPage extends Component {
 
   deleteBookingHandler = bookingId => {
     this.setState({ isLoading: true });
-    const requestBody = {
-      query: `
-            mutation CancelBooking($id: ID!) {
-              cancelBooking (bookingId: $id){
-                _id
-                title
-              }
-            }
-          `,
-      variables: {
-        id: bookingId
-      }
-    };
 
     fetch('http://localhost:8000/graphql', {
     method: 'POST',
-    body: JSON.stringify(requestBody),
+    body: JSON.stringify(cancelBooking(bookingId)),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer: ${this.context.token}`
     }
     })
     .then(res => {
-    console.log(res)
     if (res.status !== 200 && res.status !== 201) {
       throw new Error(`Failed: ${res.status}`);
     }
@@ -112,7 +81,6 @@ class BookingsPage extends Component {
       });
     })
     .catch(err => {
-      console.log(err)
       this.setState({ isLoading: false});
     });
   };
