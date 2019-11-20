@@ -32,3 +32,38 @@ export function createUser(email, password) {
     }
   };
 }
+
+export function queryBookings() {
+  return {
+    query: `
+          query {
+            bookings {
+              _id
+              createdAt
+              event {
+                _id
+                title
+                date
+                price
+              }
+            }
+          }
+        `
+  }
+}
+
+export function cancelBooking(bookingId) {
+  return {
+    query: `
+            mutation CancelBooking($id: ID!) {
+              cancelBooking (bookingId: $id){
+                _id
+                title
+              }
+            }
+          `,
+    variables: {
+      id: bookingId
+    }
+  };
+}
