@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import { createEvent, queryEvents, bookEvent } from "../helpers/requestBody";
 import Modal from '../components/Modal/Modal';
 import Backdrop from '../components/Backdrop/Backdrop'
 import AuthContext from '../context/auth-context';
@@ -51,29 +52,7 @@ class EventsPage extends Component {
       return;
     }
 
-    const requestBody = {
-      query: `
-          mutation CreateEvent($title: String!, $description: String!, $price: Float!, $date: String!) {
-            createEvent(eventInput: {title: $title, description: $description, price: $price, date: $date}) {
-              _id
-              title
-              description
-              date
-              price
-              creator {
-                _id
-                email
-              }
-            }
-          }
-        `,
-      variables: {
-        title,
-        price,
-        date,
-        description
-      }
-    };
+    const requestBody = createEvent(title, price, date, description);
 
     const token = this.context.token;
 
@@ -118,23 +97,7 @@ class EventsPage extends Component {
 
   fetchEvent = () => {
     this.setState({ isLoading: true });
-    const requestBody = {
-      query: `
-          query {
-            events {
-              _id
-              title
-              description
-              date
-              price
-              creator {
-                _id
-                email
-              }
-            }
-          }
-        `
-    };
+    const requestBody = queryEvents();
 
     fetch('http://localhost:8000/graphql', {
       method: 'POST',
@@ -176,20 +139,7 @@ class EventsPage extends Component {
       return;
     }
 
-    const requestBody = {
-      query: `
-          mutation BookEvent($id: ID!){
-            bookEvent(eventId: $id) {
-              _id
-             createdAt
-             updatedAt
-            }
-          }
-        `,
-      variables: {
-        id: this.state.selectedEvent._id
-      }
-    };
+    const requestBody = bookEvent(this.state.selectedEvent._id);
 
     const token = this.context.token;
 
