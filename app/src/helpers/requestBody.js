@@ -67,3 +67,66 @@ export function cancelBooking(bookingId) {
     }
   };
 }
+
+export function createEvent(title, price, date, description) {
+  return {
+    query: `
+          mutation CreateEvent($title: String!, $description: String!, $price: Float!, $date: String!) {
+            createEvent(eventInput: {title: $title, description: $description, price: $price, date: $date}) {
+              _id
+              title
+              description
+              date
+              price
+              creator {
+                _id
+                email
+              }
+            }
+          }
+        `,
+    variables: {
+      title,
+      price,
+      date,
+      description
+    }
+  };
+}
+
+export function queryEvents() {
+  return {
+    query: `
+          query {
+            events {
+              _id
+              title
+              description
+              date
+              price
+              creator {
+                _id
+                email
+              }
+            }
+          }
+        `
+  }
+}
+
+export function bookEvent(id) {
+  return {
+    query: `
+          mutation BookEvent($id: ID!){
+            bookEvent(eventId: $id) {
+              _id
+             createdAt
+             updatedAt
+            }
+          }
+        `,
+    variables: {
+      id: id
+    }
+  }
+}
