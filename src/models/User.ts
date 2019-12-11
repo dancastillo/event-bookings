@@ -5,6 +5,7 @@ export type UserDocument = mongoose.Document & {
   email: string;
   password: string;
   createdEvents?: mongoose.Schema.Types.ObjectId;
+  _doc?: any;
 }
 
 type userLogin = {
