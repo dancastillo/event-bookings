@@ -1,18 +1,18 @@
 import express from "express";
-import compression from "compression";
 import bodyParser from "body-parser";
-import { createServer } from "http";
+import bluebird from "bluebird";
+import compression from "compression";
 import cors from "cors";
 import mongoose from "mongoose";
-import bluebird from "bluebird";
-import { MONGODB_URI } from "./utils/secrets";
 
+import { createServer } from "http";
+import { MONGODB_URI } from "./utils/secrets";
 import { apolloServer } from "./apollo";
 // import { isAuth } from "./middleware/isAuth";
 
 const app = express();
 export const port = process.env.PORT || 3000;
-const server = apolloServer;
+
 
 // Connect to MongoDB
 const mongoUrl = MONGODB_URI;
@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // TODO: Set up isAuth middleware.
 // app.use(isAuth);
 
-server.applyMiddleware({app, path: '/apollo'});
+apolloServer.applyMiddleware({app, path: '/apollo'});
 
 const httpServer = createServer(app);
 
