@@ -1,7 +1,7 @@
 import httpServer, { port } from "./app";
 
 const server = httpServer.listen(
-  { port: 3000 },
+  { port },
   () =>
   console.log(`App is running at http://localhost:${port}`)
 );
