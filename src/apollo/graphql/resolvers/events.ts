@@ -2,6 +2,7 @@ import { Event } from "../../../models/Event";
 import { User } from "../../../models/User";
 import { transformEvent } from "./merge";
 import { dateToString } from "../../../utils/date";
+import { eventInputType, isAuthRequest } from "../../../types";
 
 export const events = async () => {
   try {
@@ -15,7 +16,7 @@ export const events = async () => {
   }
 };
 
-export const createEvent = async (args: { eventInput: { title: any; description: any; price: string | number; date: any; }; }, req: { isAuth: any; }) => {
+export const createEvent = async (args: eventInputType, req: isAuthRequest) => {
   if (!req.isAuth) {
     throw new Error('Unauthenticated');
   }
