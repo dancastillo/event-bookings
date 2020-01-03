@@ -1,50 +1,58 @@
-import React, { Component } from 'react';
-import { login, createUser } from '../helpers/requestBody';
+import * as React from 'react';
+// import AuthContext from '../context/auth-context';
+import { createUser, login } from '../helpers/requestBody';
 
 import './Auth.css';
-import AuthContext from '../context/auth-context';
 
-class AuthPage extends Component {
+interface IAuthState {
+  isLogin: boolean;
+}
 
-  state = {
+export class AuthPage extends React.Component<{}, IAuthState> {
+  public state: IAuthState = {
     isLogin: true
   };
 
-  static contextType = AuthContext;
+  // private static contextType = AuthContext;
+  private readonly emailEl: React.RefObject<HTMLInputElement>;
+  private readonly passwordEl: React.RefObject<HTMLInputElement>;
 
-  constructor(props) {
+  constructor(props: Readonly<{}>) {
     super(props);
     this.emailEl = React.createRef();
     this.passwordEl = React.createRef();
   }
 
-  switchModeHandler = () => {
-    this.setState(prevState => {
+  public switchModeHandler = () => {
+    this.setState((prevState: IAuthState) => {
       return {
         isLogin: !prevState.isLogin
       }
     });
   };
 
-  submitHandler = (event) => {
+  public submitHandler = (event: any)=> {
     event.preventDefault();
+    // @ts-ignore
     const email = this.emailEl.current.value;
+    // @ts-ignore
     const password = this.passwordEl.current.value;
 
-    if (email.trim().length === 0 || password.trim() === 0) {
+    if (email.trim().length === 0 || password.trim().length === 0) {
       return;
     }
 
     const requestBody = (!this.state.isLogin) ? createUser(email, password) : login(email, password);
 
     fetch('http://localhost:8000/apollo', {
-      method: 'POST',
       body: JSON.stringify(requestBody),
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      method: 'POST',
     })
       .then(res => {
+        console.log(res);
         if (res.status !== 200 && res.status !== 201) {
           throw new Error(`Failed: ${res.status}`);
         }
@@ -57,10 +65,13 @@ class AuthPage extends Component {
           this.context.login(token, userId, tokenExpiration);
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        throw new Error(err);
+      });
   };
 
-  render() {
+  public render() {
     return <form className="auth-form" onSubmit={this.submitHandler}>
       <div className="form-control">
         <label htmlFor="email">Email</label>
@@ -78,5 +89,3 @@ class AuthPage extends Component {
 
   }
 }
-
-export default AuthPage;
