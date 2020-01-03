@@ -11,7 +11,7 @@ import { apolloServer } from "./apollo";
 // import { isAuth } from "./middleware/isAuth";
 
 const app = express();
-export const port = process.env.PORT || 3000;
+export const port = process.env.PORT || 8000;
 
 
 // Connect to MongoDB

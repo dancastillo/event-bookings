@@ -2,7 +2,7 @@ import React from 'react';
 
 import './BookingControl.css'
 
-const bookingControl = props => {
+export const BookingControls = props => {
   return (
     <div className='booking-control'>
       <button className={props.activeOutputType === 'list' ? 'active' : ''}
@@ -16,5 +16,3 @@ const bookingControl = props => {
     </div>
   )
 };
-
-export default bookingControl;

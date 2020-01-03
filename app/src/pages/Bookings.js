@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { queryBookings, cancelBooking } from './../helpers/requestBody';
+import { queryBookings, cancelBooking } from '../helpers/requestBody';
 import Spinner from '../components/Spinner/Spinner';
 import AuthContext from '../context/auth-context';
 import BookingList from '../components/Bookings/BookingList/BookingList';
@@ -24,7 +24,7 @@ class BookingsPage extends Component {
   fetchBookings = () => {
     this.setState({ isLoading: true });
 
-    fetch('http://localhost:8000/graphql', {
+    fetch('http://localhost:8000/apollo', {
       method: 'POST',
       body: JSON.stringify(queryBookings),
       headers: {
@@ -59,7 +59,7 @@ class BookingsPage extends Component {
   deleteBookingHandler = bookingId => {
     this.setState({ isLoading: true });
 
-    fetch('http://localhost:8000/graphql', {
+    fetch('http://localhost:8000/apollo', {
     method: 'POST',
     body: JSON.stringify(cancelBooking(bookingId)),
     headers: {

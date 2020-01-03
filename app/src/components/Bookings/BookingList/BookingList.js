@@ -2,7 +2,7 @@ import React from 'react';
 
 import './BookingList.css';
 
-const bookingList = props => {
+export const BookingList = props => {
   return (
     <ul className='bookings__list'>
       {props.bookings.map(booking => {
@@ -22,5 +22,3 @@ const bookingList = props => {
     </ul>
   );
 };
-
-export default bookingList;

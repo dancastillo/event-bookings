@@ -1,18 +1,11 @@
 import { User } from "../../../models/User";
 import jwt from "jsonwebtoken";
-
-type userInput = {
-  email: string;
-  password: string;
-};
-
-type createUserArgs = {
-  userInput: userInput
-}
+import { createUserArgs, userInput } from "../../../types";
 
 export const authResolverMap = {
 
-}
+};
+
 export const createUser = async (args: createUserArgs) => {
   const existingUser = await User.findOne({ email: args.userInput.email });
 

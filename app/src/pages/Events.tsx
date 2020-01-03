@@ -1,26 +1,39 @@
-import React, { Component } from 'react';
+import * as React from 'react';
+import { Backdrop } from '../components/Backdrop/Backdrop'
+import { EventList } from '../components/Events/EventList/EventList';
+import { Modal } from '../components/Modal/Modal';
+import { Spinner } from '../components/Spinner/Spinner';
+// import AuthContext from '../context/auth-context';
 
-import { createEvent, queryEvents, bookEvent } from "../helpers/requestBody";
-import Modal from '../components/Modal/Modal';
-import Backdrop from '../components/Backdrop/Backdrop'
-import AuthContext from '../context/auth-context';
-import EventList from '../components/Events/EventList/EventList';
-import Spinner from '../components/Spinner/Spinner';
+import { bookEvent, createEvent, queryEvents } from "../helpers/requestBody";
 import './Events.css';
 
-class EventsPage extends Component {
+interface IEventsState {
+  creating: boolean;
+  events: any[];
+  isLoading: boolean;
+  selectedEvent: any;
+}
 
-  state = {
+export class EventsPage extends React.Component<{}, IEventsState> {
+
+  // static contextType = AuthContext;
+
+  public state: IEventsState = {
     creating: false,
     events: [],
     isLoading: false,
     selectedEvent: null
   };
-  isActive = true;
 
-  static contextType = AuthContext;
+  private isActive = true;
 
-  constructor(props) {
+  private readonly titleElRef: React.RefObject<HTMLInputElement>;
+  private readonly priceElRef: React.RefObject<HTMLInputElement>;
+  private readonly dateElRef: React.RefObject<HTMLInputElement>;
+  private readonly descriptionElRef: React.RefObject<HTMLTextAreaElement>;
+
+  constructor(props: Readonly<{}>) {
     super(props);
     this.titleElRef = React.createRef();
     this.priceElRef = React.createRef();
@@ -28,41 +41,45 @@ class EventsPage extends Component {
     this.descriptionElRef = React.createRef();
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     this.fetchEvent();
   }
 
-  startCreateEventHandler = () => {
+  public startCreateEventHandler = () => {
     this.setState({creating: true})
   };
 
-  modalConfirmHandler = () => {
+  public modalConfirmHandler = () => {
     this.setState({creating: false});
-    const title = this.titleElRef.current.value;
-    const price = parseFloat(this.priceElRef.current.value);
-    const date = this.dateElRef.current.value;
-    const description = this.descriptionElRef.current.value;
+    // @ts-ignore
+    const titleValue = this.titleElRef.current.value;
+    // @ts-ignore
+    const priceValue = parseFloat(this.priceElRef.current.value);
+    // @ts-ignore
+    const dateValue = this.dateElRef.current.value;
+    // @ts-ignore
+    const descriptionValue = this.descriptionElRef.current.value;
 
     if (
-      title.trim().length === 0 ||
-      price <= 0 ||
-      date.trim().length === 0 ||
-      description.trim().length === 0
+      titleValue.trim().length === 0 ||
+      priceValue <= 0 ||
+      dateValue.trim().length === 0 ||
+      descriptionValue.trim().length === 0
     ) {
       return;
     }
 
-    const requestBody = createEvent(title, price, date, description);
+    const requestBody = createEvent(titleValue, priceValue, dateValue, descriptionValue);
 
     const token = this.context.token;
 
     fetch('http://localhost:8000/apollo', {
-      method: 'POST',
       body: JSON.stringify(requestBody),
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      method: 'POST',
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
@@ -72,39 +89,41 @@ class EventsPage extends Component {
         return res.json();
       })
       .then(data => {
-        this.setState(prevState => {
+        this.setState((prevState: IEventsState) => {
           const { _id, title, description, date, price } = data.data.createEvent;
           const updatedEvents = [...prevState.events];
           updatedEvents.push({
             _id,
-            title,
-            description,
-            date,
-            price,
             creator: {
               _id: this.context.userId
-            }
-          })
+            },
+            date,
+            description,
+            price,
+            title,
+          });
           return { events: updatedEvents };
         });
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        throw new Error(err);
+      });
   };
 
-  modalCancelHandler = () => {
+  public modalCancelHandler = () => {
     this.setState({creating: false, selectedEvent: null});
   };
 
-  fetchEvent = () => {
+  public fetchEvent = () => {
     this.setState({ isLoading: true });
     const requestBody = queryEvents();
 
     fetch('http://localhost:8000/apollo', {
-      method: 'POST',
       body: JSON.stringify(requestBody),
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      method: 'POST',
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
@@ -126,14 +145,14 @@ class EventsPage extends Component {
       });
   };
 
-  showDetailHandler = eventId => {
-    this.setState(prevState => {
+  public showDetailHandler = (eventId: string) => {
+    this.setState((prevState: IEventsState) => {
       const selectedEvent = prevState.events.find(e => e._id === eventId);
       return { selectedEvent };
     });
   };
 
-  bookEventHandler = () => {
+  public bookEventHandler = () => {
     if (!this.context.token) {
       this.setState({ selectedEvent: null });
       return;
@@ -144,12 +163,12 @@ class EventsPage extends Component {
     const token = this.context.token;
 
     fetch('http://localhost:8000/apollo', {
-      method: 'POST',
       body: JSON.stringify(requestBody),
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+      },
+      method: 'POST',
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
@@ -166,21 +185,21 @@ class EventsPage extends Component {
       });
   };
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.isActive = false;
   }
 
-  render() {
+  public render() {
     return (
       <React.Fragment>
         {(this.state.creating || this.state.selectedEvent) && <Backdrop />}
         {this.state.creating &&
-          (<Modal title='Add Event'
-                 canCancel
-                 canConfirm
-                 onCancel={this.modalCancelHandler}
-                 onConfirm={this.modalConfirmHandler}
-                 confirmText='Confirm'>
+        (<Modal title='Add Event'
+                canCancel={true}
+                canConfirm={false}
+                onCancel={this.modalCancelHandler}
+                onConfirm={this.modalConfirmHandler}
+                confirmText='Confirm'>
             <p>Modal Content</p>
             <form>
               <div className='form-control'>
@@ -197,6 +216,7 @@ class EventsPage extends Component {
               </div>
               <div className='form-control'>
                 <label htmlFor="description">Description</label>
+                // @ts-ignore
                 <textarea rows='4' id='description' ref={this.descriptionElRef}/>
               </div>
             </form>
@@ -204,8 +224,8 @@ class EventsPage extends Component {
         )}
         { this.state.selectedEvent &&
         (<Modal title={this.state.selectedEvent.title}
-                canCancel
-                canConfirm
+                canCancel={false}
+                canConfirm={true}
                 onCancel={this.modalCancelHandler}
                 onConfirm={this.bookEventHandler}
                 confirmText={this.context.token ? 'Book' : 'Confirm'}>
@@ -215,10 +235,10 @@ class EventsPage extends Component {
           </Modal>
         )}
         {this.context.token &&
-          (<div className='events-control'>
-            <p>Share your own events!</p>
-            <button className='btn' onClick={this.startCreateEventHandler}>Create Event</button>
-          </div>)
+        (<div className='events-control'>
+          <p>Share your own events!</p>
+          <button className='btn' onClick={this.startCreateEventHandler}>Create Event</button>
+        </div>)
         }
         { this.state.isLoading
           ? (<Spinner />)
@@ -232,5 +252,3 @@ class EventsPage extends Component {
     );
   }
 }
-
-export default EventsPage;
